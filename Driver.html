@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 
-Tanner Bailey <br>
+Tanner Bailey, Warren Jernigan, and Ben Sauberman<br>
+!!! Let's Play Mario !!! <br>
 Computer Science 363 - Computer Graphics <br>
-Lab 5 - Due November 13th @ 5PM <br>
+Final Project - Due December 11th @5PM <br>
 <br>
 <br>
 
@@ -12,9 +13,8 @@ Lab 5 - Due November 13th @ 5PM <br>
     attribute vec4 vertexColor;
     attribute vec4 vertexNormal;
 
-    uniform float rotationRate;
-    uniform float orbitRate;
-    uniform float distanceFromOrigin;
+    uniform float runRate;
+    uniform float jumpRate;
     uniform mat4 modelViewMat;
     uniform mat4 projectionMat;
 
@@ -22,45 +22,40 @@ Lab 5 - Due November 13th @ 5PM <br>
     uniform vec4 lightPosition;
     uniform float shininess;
 
-    uniform vec4 specularProduct2;
-    uniform vec4 lightPosition2;
-    uniform float shininess2;
-    uniform float light2Status;
-
     varying vec4 fColor;
     void
     main(){
-        mat4 orbitMat   = mat4(cos(orbitRate)         , -sin(orbitRate), 0.0                , 0.0,
-                               sin(orbitRate)         , cos(orbitRate) , 0.0                , 0.0,
-                               0.0                    , 0.0            , 1.0                , 0.0,
-                               0.0                    , 0.0            , 0.0                , 1.0);
-        mat4  rotateMat = mat4(cos(rotationRate)      , 0.0            , sin(rotationRate)  , 0.0,
-                               0.0                    , 1.0            , 0.0                , 0.0,
-                               -sin(rotationRate)     , 0.0            , cos(rotationRate)  , 0.0,
-                               0.0                    , 0.0            , 0.0                , 1.0);
-        gl_Position     = projectionMat * modelViewMat * orbitMat *
+        mat4 runMat    = mat4(1.0, 0.0, 0.0, 0.0,
+                              0.0, 1.0, 0.0, 0.0,
+                              0.0, 0.0, 1.0, 0.0,
+                              0.0, 0.0, 0.0, 1.0);
+        mat4 jumpMat   = mat4(1.0, 0.0, 0.0, 0.0,
+                              0.0, 1.0, 0.0, 0.0,
+                              0.0, 0.0, 1.0, 0.0,
+                              0.0, 0.0, 0.0, 1.0);
+       gl_Position     = projectionMat * modelViewMat * runMat *
                           mat4(1.0                    , 0.0            , 0.0                , 0.0,
                                0.0                    , 1.0            , 0.0                , 0.0,
                                0.0                    , 0.0            , 1.0                , 0.0,
                                3.0                    , 0.0            , 0.0                , 1.0) *
-                          rotateMat * vertexPosition;
-        vec4 position = -(modelViewMat * orbitMat *
+                          jumpMat * vertexPosition;
+       vec4 position   = -(modelViewMat * runMat *
                           mat4(1.0                    , 0.0            , 0.0                , 0.0,
                                0.0                    , 1.0            , 0.0                , 0.0,
                                0.0                    , 0.0            , 1.0                , 0.0,
                                3.0                    , 0.0            , 0.0                , 1.0) *
-                          rotateMat * vertexPosition);
+                          jumpMat * vertexPosition);
 
         vec4 light    = lightPosition;
         vec4 L        = normalize(light - position);
         vec4 E        = normalize(-position);
         vec4 H        = normalize(L + E);
-        vec4 N        = -(modelViewMat * orbitMat *
+        vec4 N        = -(modelViewMat * runMat *
                           mat4(1.0                    , 0.0            , 0.0                , 0.0,
                                0.0                    , 1.0            , 0.0                , 0.0,
                                0.0                    , 0.0            , 1.0                , 0.0,
                                3.0                    , 0.0            , 0.0                , 1.0) *
-                               rotateMat * vertexNormal);
+                               jumpMat * vertexNormal);
         N            = normalize(N);
 
         vec4  ambient   = ambientProduct;
@@ -72,22 +67,7 @@ Lab 5 - Due November 13th @ 5PM <br>
             specular = vec4(0.0, 0.0, 0.0, 1.0);
         }
 
-        vec4 light2      = lightPosition2;
-        vec4 L2          = normalize(light2 - position);
-        vec4 H2          = normalize(L2 + E);
-        float kSpecular2 = pow(max(dot(N, H2), 0.0), shininess2);
-        vec4 specular2   = kSpecular2 * specularProduct2;
-        if(dot(L2, N) < 0.0){
-            specular2 = vec4(0.0, 0.0, 0.0, 1.0);
-        }
-
-        if(abs(light2Status) < 0.1){
-            fColor = specular + ambient + diffuse;
-        }
-        else{
-            fColor = specular + ambient + diffuse + specular2;
-        }
-
+        fColor = specular + ambient + diffuse;
         fColor.a = 1.0;
     }
 </script>
@@ -112,8 +92,8 @@ main(){
     Oops ... your browser doesn't support the HTML5 canvas element
 </canvas>
 
-<button class = "button bbutton" id = RotateButton>Rotate</button>
-<button class = "button rbutton" id = OrbitButton>Revolve</button>
-<button class = "button gbutton" id = SpecularButton>Specular</button>
+<button class = "button bbutton" id = RunButton>Run/Stop</button>
+<button class = "button rbutton" id = JumpButton>Jump/Drop</button>
+<button class = "button gbutton" id = SaveButton>Save The Princess!</button>
 
 </html>
