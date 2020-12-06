@@ -48,7 +48,66 @@ var vertexPositions = [
     vec4(0.25 , 0.75, -0.3, 1.0),    // vertex 1
     vec4(0.0  , 1.0 , 0.0 , 1.0),    // vertex 2
     vec4(-0.25, 0.75, 0.0 , 1.0),    // vertex 3
+
+    //peach head
+    vec4(0.25,0.0,0.25,1.0),        // vertex #4 position   0
+    vec4(0.25, 0.0, -0.25, 1.0),   // vertex #5 position  1
+    vec4(0.0, 0.47, 0.0, 1.0),    //  vertex #6 position, controls height, peak vertex  2
+    vec4(-0.25, 0.0, 0.25, 1.0),    //  vertex #7 position  3
+    vec4(-0.25, 0.0, -0.25, 1.0),   //vertex 8 position  4
+    vec4(0.0, -0.52, 0.0, 1.0),   //vertex 9 position, controls height down, peak vertex bottom  5
+    vec4(0.35, 0.3, 0.0, 1.0),      //vertex 10 position  6
+    vec4(-0.35, 0.3, 0.0, 1.0),  //vertex 11 position  7
+    vec4(0.0, 0.45, 0.205, 1.0),   //vertex 12 position //big point top face, top forehead  8
+    vec4(0.0, 0.45, -0.35, 1.0),  //vertex 13 position //big point, back face, back of head 9
+    vec4(0.0, -0.5, 0.15, 1.0),  //vertex 14 position //big point, bottom face, bottom chin 10
+    vec4(0.0, -0.3, -0.35, 1.0),    //vertex 15 position  11
+    vec4(-0.35, -0.3, 0.0, 1.0),    //vertex 16 position  12
+    vec4(0.35, -0.3, 0.0, 1.0)      //vertex 17 position  13
 ];
+
+var indices = [
+    //bottom
+    //chin
+    7, 4, 14,
+    4, 9, 14,
+    9, 7, 14,
+    //
+    8, 5, 15,
+    5, 9, 15,
+    9, 8, 15,
+    //
+    7, 8, 16,
+    8, 9, 16,
+    9, 7, 16,
+    //
+    4, 5, 17,
+    5, 9, 17,
+    9, 4, 17,
+
+    //top
+    //right side of face
+    4, 5, 10,
+    5, 10, 13,
+    6, 12, 10,
+    //
+    //left side of face
+    7, 8, 11,
+    8, 13, 11,
+    6, 11, 12,
+    //
+    //upper face
+    4, 10, 12,
+    11, 7, 12,
+    7, 4, 12,
+    //
+    //back of head
+    6, 11, 13,
+    6, 10, 13,
+    5, 8, 13,
+
+];
+
 
 //Use myTriangle to create Mario's character model
 mytriangle(3, 1, 0, 0);
@@ -61,6 +120,12 @@ mytriangle(2, 3, 0, 0);
 
 //Create all the vertices associated with the Peach's initial locations (Peach is type 2)
 //Use myTriangle to create Peach's character model
+//builds peache's model
+var i;
+for(i = 0; i < indices.length; i+=3){
+    mytriangle(indices[i], indices[i+1], indices[i+2], 2);
+}
+
 
 var runRate = 0.0;
 var deltaRunRate = 0.1;
