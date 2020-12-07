@@ -28,11 +28,11 @@ Final Project - Due December 11th @5PM <br>
         mat4 runMat    = mat4(1.0, 0.0, 0.0, 0.0,
                               0.0, 1.0, 0.0, 0.0,
                               0.0, 0.0, 1.0, 0.0,
-                              0.0, 0.0, 0.0, 1.0);
+                              runRate, 0.0, 0.0, 1.0);
         mat4 jumpMat   = mat4(1.0, 0.0, 0.0, 0.0,
                               0.0, 1.0, 0.0, 0.0,
                               0.0, 0.0, 1.0, 0.0,
-                              0.0, 0.0, 0.0, 1.0);
+                              0.0, jumpRate, 0.0, 1.0);
        gl_Position     = projectionMat * modelViewMat * runMat *
                           mat4(1.0                    , 0.0            , 0.0                , 0.0,
                                0.0                    , 1.0            , 0.0                , 0.0,

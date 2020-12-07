@@ -39,16 +39,21 @@ var vertexColors = [
     vec4(1.0, 0.0, 0.0, 1.0),    // vertex #0 color
     vec4(0.0, 1.0, 0.0, 1.0),    // vertex #1 color
     vec4(0.0, 0.0, 1.0, 1.0),    // vertex #2 color
-    vec4(1.0, 0.5, 0.0, 1.0)     // vertex #3 color
+    vec4(1.0, 0.5, 0.0, 1.0),    // vertex #3 color
+    vec4(1.0, 0.0, 0.0, 1.0),    // vertex #0 color
+    vec4(0.0, 1.0, 0.0, 1.0),    // vertex #1 color
+    vec4(0.0, 0.0, 1.0, 1.0),    // vertex #2 color
+    vec4(1.0, 0.5, 0.0, 1.0),    // vertex #3 color
+    vec4(1.0, 0.0, 0.0, 1.0),    // vertex #0 color
+    vec4(0.0, 1.0, 0.0, 1.0),    // vertex #1 color
+    vec4(0.0, 0.0, 1.0, 1.0),    // vertex #2 color
+    vec4(1.0, 0.5, 0.0, 1.0),    // vertex #3 color
+    vec4(1.0, 0.0, 0.0, 1.0),    // vertex #0 color
+    vec4(0.0, 1.0, 0.0, 1.0),    // vertex #1 color
+    vec4(0.0, 1.0, 0.0, 1.0),    // vertex #1 color
 ];
 
-//Create all the vertices associated with Mario's initial locations (Mario is type 0)
 var vertexPositions = [
-    vec4(0.0  , 0.75, 0.4 , 1.0),    // vertex 0
-    vec4(0.25 , 0.75, -0.3, 1.0),    // vertex 1
-    vec4(0.0  , 1.0 , 0.0 , 1.0),    // vertex 2
-    vec4(-0.25, 0.75, 0.0 , 1.0),    // vertex 3
-
     //peach head
     vec4(0.25,0.0,0.25,1.0),        // vertex #4 position   0
     vec4(0.25, 0.0, -0.25, 1.0),   // vertex #5 position  1
@@ -69,66 +74,58 @@ var vertexPositions = [
 var indices = [
     //bottom
     //chin
-    7, 4, 14,
-    4, 9, 14,
-    9, 7, 14,
+    3, 0, 10,
+    0, 5, 10,
+    5, 3, 10,
     //
-    8, 5, 15,
-    5, 9, 15,
-    9, 8, 15,
+    4, 1, 11,
+    1, 5, 11,
+    5, 4, 11,
     //
-    7, 8, 16,
-    8, 9, 16,
-    9, 7, 16,
+    3, 4, 12,
+    4, 5, 12,
+    5, 3, 12,
     //
-    4, 5, 17,
-    5, 9, 17,
-    9, 4, 17,
+    0, 1, 13,
+    1, 5, 13,
+    5, 0, 13,
 
     //top
     //right side of face
-    4, 5, 10,
-    5, 10, 13,
-    6, 12, 10,
+    0, 1, 6,
+    1, 6, 9,
+    2, 8, 6,
     //
     //left side of face
-    7, 8, 11,
-    8, 13, 11,
-    6, 11, 12,
+    3, 4, 7,
+    4, 9, 7,
+    2, 7, 8,
     //
     //upper face
-    4, 10, 12,
-    11, 7, 12,
-    7, 4, 12,
+    0, 6, 8,
+    7, 3, 8,
+    3, 0, 8,
     //
     //back of head
-    6, 11, 13,
-    6, 10, 13,
-    5, 8, 13,
+    2, 7, 9,
+    3, 6, 9,
+    1, 4, 9,
 
 ];
-
-
-//Use myTriangle to create Mario's character model
-mytriangle(3, 1, 0, 0);
-mytriangle(0, 1, 2, 0);
-mytriangle(3, 2, 1, 0);
-mytriangle(2, 3, 0, 0);
 
 //Create all the vertices associated with the Goomba's initial locations (Goomba is type 1)
 //Use myTriangle to create Goomba's character model
 
 //Create all the vertices associated with the Peach's initial locations (Peach is type 2)
 //Use myTriangle to create Peach's character model
-//builds peache's model
+//builds peach's model
 var i;
 for(i = 0; i < indices.length; i+=3){
-    mytriangle(indices[i], indices[i+1], indices[i+2], 2);
+    mytriangle(indices[i], indices[i+1], indices[i+2], 2.0);
 }
 
-
 var runRate = 0.0;
-var deltaRunRate = 0.1;
+var deltaRunRate = 0.001;
 var runLocation;
 //Control the variable that indicates if Mario is running or not
 var runOn = false;
@@ -137,7 +134,7 @@ function runControl() {
 }
 
 var jumpRate = 0.0;
-var deltaJumpRate = 0.1;
+var deltaJumpRate = 0.001;
 var jumpLocation;
 //Control the variable that indicates if Mario is jumping or not
 var jumpOn = false;
@@ -228,14 +225,15 @@ window.onload = function init()
 function render()
 {
     webgl.clear( webgl.COLOR_BUFFER_BIT | webgl.DEPTH_BUFFER_BIT);
-
     if(runOn) {
-        runRate = IncrementClamp(runRate, deltaRunRate, 2.0 * Math.PI);
+        runRate = IncrementClamp(runRate, deltaRunRate, 100.0);
     }
+    webgl.uniform1f(runLocation, runRate);
     if(jumpOn){
-        jumpRate    = IncrementClamp(jumpRate, deltaJumpRate, 2.0 * Math.PI);
+        jumpRate    = IncrementClamp(jumpRate, deltaJumpRate, 100.0);
     }
-    webgl.uniform1f(rotationLocation, rotationRate);
+    webgl.uniform1f(jumpLocation, jumpRate);
+
 
     modelViewMat       = lookAt(eye,at,up);
     projectionMat      = perspective(fovy, aspect, near, far);
@@ -249,9 +247,7 @@ function render()
     webgl.uniform4fv(specularProductLoc, specularProduct);
     webgl.uniform4fv(lightPositionLoc, lightPosition);
     webgl.uniform1f(shininessLoc, shininess)
-
     webgl.drawArrays(webgl.TRIANGLES, 0, pointsArray.length);
-
     requestAnimFrame( render );
 }
 
