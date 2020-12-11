@@ -1,17 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 
-
-
-Ben Tanner Warren<br>
-CSC363 <br>
+Computer Science 363 - Computer Graphics <br>
 Final Project <br>
-<br>
-<br>
-<br>
+Due December 11, 2020 @5 PM
+Tanner Bailey, Ben Sauberman, and Warren Jernigan<br>
+Let's Play Mario! <br><br>
+Hello! Welcome to the Mushroom Kingdom!<br>
+Mario is ready to finish the level and begin his Christmas shopping!<br>
+All Mario needs to do is get to the end  to finish the level, but Princess Peach is between him and the end!<br>
+As the gentleman he is, Mario needs to get past Peach without running into her!<br><br>
+Use the buttons below to control Mario's movement<br>
+You can use the run/stop button to make Mario move across the screen or stop moving across the screen<br>
+Click the jump button and Mario will start jumping. Only click this button once because Mario loves jumping and won't stop after he starts jumping<br>
+Mario can get to the end by running through Peach, but try to make him jump over Peach on his way or Santa will put a Blue Shell in his stocking this Christmas!<br><br>
 
-HTML StartUp:  vertex shader <br>
-
+Good luck!<br>
+<br>
 
 <script id="vertex-shader" type="x-shader/x-vertex">
     // VERTEX SHADER
@@ -20,6 +25,9 @@ HTML StartUp:  vertex shader <br>
     // a color (vColor),
     attribute vec4 vPosition;
     attribute vec4 vColor;
+
+
+    //attribute vec2 vTexCoord;
 
     attribute vec4 vNormal;
     attribute float vType;
@@ -35,6 +43,8 @@ HTML StartUp:  vertex shader <br>
     uniform float shininess2;
 
     varying vec4 fColor;
+    //varying vec2 fTexCoord;
+    //varying float fType;
 
     void
     main()
@@ -53,17 +63,23 @@ HTML StartUp:  vertex shader <br>
 
     //current Matrix Transform
     // creates rotation of the object about the origin
-    mat4 CMT = mat4(1.0, 0.0, 0.0, 0.0,
-                  0.0, 1.0, 0.0, 0.0,
-                  0.0, 0.0, 1.0, 0.0,
-                  runRate, 0.0, 0.0, 1.0) *
-                  mat4(0.5                    , 0.0            , 0.0                , 0.0,
-                   0.0                    , 0.5            , 0.0                , 0.0,
-                   0.0                    , 0.0            , -0.5                , 0.0,
-                   0.0                    , 0.0            , 0.0                , 1.0) *  mat4(1.0, 0.0, 0.0, 0.0,
-                  0.0, 1.0, 0.0, 0.0,
-                  0.0, 0.0, 1.0, 0.0,
-                  0.0, jumpRate, 0.0, 1.0);
+    mat4 runMat  = mat4(1.0, 0.0, 0.0, 0.0,
+                        0.0, 1.0, 0.0, 0.0,
+                        0.0, 0.0, 1.0, 0.0,
+                        runRate, 0.0, 0.0, 1.0);
+    mat4 jumpMat = mat4(1.0, 0.0, 0.0, 0.0,
+                        0.0, 1.0, 0.0, 0.0,
+                        0.0, 0.0, 1.0, 0.0,
+                        0.0, jumpRate, 0.0, 1.0);
+    mat4 CMT     = mat4(0.5, 0.0, 0.0,  0.0,
+                        0.0, 0.5, 0.0,  0.0,
+                        0.0, 0.0, -0.5, 0.0,
+                        0.0, 0.0, 0.0,  1.0);
+    mat4 CMT2    = mat4(1.0, 0.0, 0.0,  0.0,
+                        0.0, -1.0, 0.0,  0.0,
+                        0.0, 0.0, 1.0, 0.0,
+                        0.0, 0.0, 0.0,  1.0);
+
 
 
     mat4 MVCMT = modelViewMatrix * CMT;
@@ -110,14 +126,25 @@ HTML StartUp:  vertex shader <br>
     fColor = vColor + specular;
     fColor.a = 1.0;
 
-    gl_Position = projectionMatrix * MVCMT * vPosition;
+    if(abs(vType - 1.0) < 0.1){
+        gl_Position = projectionMatrix * modelViewMatrix * runMat * CMT * CMT * CMT * jumpMat * vPosition;
+    }
+    /*
+    else if(abs(vType - 2.0) < 0.2){
+        gl_Position = projectionMatrix *  MVCMT * vPosition;
+    }*/
+    else{
+        gl_Position = projectionMatrix * MVCMT * CMT2 * vPosition;
+    }
 
-  }
+
+    //fTexCoord = vTexCoord;
+    //fType = vType;
+
+
+}
+
 </script>
-
-
-
-HTML StartUp:  fragment shader <br>
 
 <script id="fragment-shader" type="x-shader/x-fragment">
 // FRAGMENT SHADER
@@ -126,24 +153,34 @@ HTML StartUp:  fragment shader <br>
 // set floating point precision to be "medium"
 precision mediump float;
 
+uniform sampler2D texMap;
+
 // varying fColor (passed from vertex shader) is
 // assigned to gl_FragColor.
 varying vec4 fColor;
+//varying vec2 fTexCoord; //failed texture
+//varying float fType;  //failed texture
+
 void
 main()
 {
     gl_FragColor = fColor;
+
+    //stuff for the failed texture
+    //if(abs(fType - 2.0) < 0.2){
+    //    gl_FragColor = fColor*texture2D(texMap, fTexCoord);
+   // }
+    //else{
+    //    gl_FragColor = fColor;
+    //}
 }
 </script>
 
-HTML StartUp:  load java script <br>
 
 <script type="text/javascript" src="webgl-utils.js"></script>
 <script type="text/javascript" src="initShaders.js"></script>
 <script type="text/javascript" src="MV.js"></script>
 <script type="text/javascript" src="Driver.js"></script>
-
-HTML StartUp:  check for html5 <br>
 <br>
 <br>
 
@@ -160,7 +197,7 @@ width and height 512 pixels
 </div>
 <button class = "button bbutton" id = RunButton>Run/Stop</button>
 <button class = "button rbutton" id = JumpButton>Jump/Drop</button>
-<button class = "button gbutton" id = SaveButton>Save The Princess!</button>
+<button class = "button gbutton" id = FinishButton>Finish</button>
 
 
 </body>
