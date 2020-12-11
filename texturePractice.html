@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!--
+    This is the failed texture that works on its own but when added to
+    our final project, did not want to work for some reason.
+    It was adapted from the lab5 code
+-->
+
+
+Warren Jernigan<br>
+CSC363/663 <br>
+Texture Practice <br>
+Grass texture<br>
+Phong Model <br>
+<br>
+<br>
+
+HTML StartUp:  vertex shader <br>
+<br>
+
+<body>
+<div>
+    <script>//creates button that starts and stops the objects rotation</script>
+    <button class="button rButton" id="rButton">Start and stop rotation</button>
+    <br>
+    <br>
+    <script>//creates a slider that controls objects orbit speed</script>
+    Change theta: (orbit) <br>
+    <input type="range" id= "sliderT" min="0.0" value="0.05" max ="0.1" step = "0.01">
+    <br>
+    <script>//creates a slider that controls the speed of the objects rotation</script>
+    Change phi: (rotation) <br>
+    <input type="range" id= "sliderP" min="0.0" value="0.05" max ="0.1" step = "0.01">
+    <br>
+    <br>
+
+    <script>//creates sliders that change the objects position about the origin</script>
+    Change x:
+    <input type="range" id= "sliderDX" min="0.0" value="0.5" max ="1.5" step = "0.05">
+    <br>
+    Change y:
+    <input type="range" id= "sliderDY" min="-1.0" value="0.0" max ="1.5" step = "0.05">
+    <br>
+    Change z:
+    <input type="range" id= "sliderDZ" min="0.0" value="0.5" max ="1.5" step = "0.05">
+    <br>
+    <br>
+    <br>
+    Change Shininess:
+    <input type="range" id= "sliderShine" min="0.0" value="50.0" max ="200.0" step = "5.0">
+    <br>
+    <br>
+
+</div>
+</body>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+    // VERTEX SHADER
+    // This is called and applied to every vertex. The vertex
+    // in this shader has two "attributes", a position (vPosition),
+    // a color (vColor),
+    attribute vec4 vPosition;
+    attribute vec4 vNormal;
+    attribute vec2 vTexCoord;
+
+    // uniforms for angle of rotation (theta), model view (modelViewMatrix),
+    // and perspective projection (projectionMatrix)
+    uniform float theta;
+    uniform float phi;
+    uniform float distanceX;
+    uniform float distanceY;
+    uniform float distanceZ;
+    uniform mat4 modelViewMatrix;
+    uniform mat4 projectionMatrix;
+    uniform float shininess;
+
+    // boring varying
+    varying vec4 fColor;
+    varying vec2 fTexCoord;
+
+    void
+    main()
+    {
+    //sets up first light model, only contains ambient and diffuse lights
+    vec3 light = vec3(0.75, 1.3, 2.8);
+    vec4 ambientProduct = vec4(0.6,0.6, 0.75, 1.0);
+    vec4 diffuseProduct = vec4(0.3, 0.4, 0.1, 1.0);
+    vec4 specularProduct = vec4(0.9, 0.6, 0.3, 1.0);
+
+    //sets up second light model, only contains specular light
+    vec3 light2 = vec3(0.0, 0.0, 1.0);
+    vec4 ambientProduct2 = vec4(0.2, 0.3, 0.4, 1.0);
+    vec4 diffuseProduct2 = vec4(0.4, 0.5, 0.3, 1.0);
+    vec4 specularProduct2 = vec4(0.2, 0.8, 0.2, 1.0);
+
+    /*
+    //current Matrix Transform
+    //creates rotaton of the object about the origin
+    mat4 CMT = mat4( cos(theta), 0.0, -sin(theta), 0.0,
+                    0.0,        1.0, 0.0,        0.0,
+                    sin(theta),0.0, cos(theta), 0.0,
+                    0.0,        0.0, 0.0,        1.0) *
+      //creates rotation of the object about its y-axis (spin of object) and changes
+      //position of the object about the origin
+          mat4(cos(phi), 0.0, -sin(phi), 0.0,
+                0.0,      1.0,     0.0,   0.0,
+                sin(phi), 0.0, cos(phi),  0.0,
+               distanceX,      distanceY,   distanceZ,     1.0);*/
+
+    //mode view matrix * CMT
+    //mat4 MVCMT = modelViewMatrix*CMT;
+    mat4 MVCMT = modelViewMatrix;
+
+    //Apply BLINN-PHONG
+
+    ///////////////////ambient and diffuse light///////////////////////////
+    //determine vector from vPosition in modelView back to light
+    vec3 pos = -(MVCMT*vPosition).xyz;
+    vec3 L = normalize(light-pos);
+
+    vec3 E = normalize(-pos);
+    vec3 H = normalize(L+E);   //Blinn
+
+    //normal to final position
+    vec3 N = normalize((MVCMT*vNormal).xyz);
+
+    //ambient contribution
+    vec4 ambient = ambientProduct;
+
+    //diffuse contribution
+    float Kd = max(dot(L,N), 0.0);
+    vec4 diffuse = Kd*diffuseProduct;
+
+    //specular contribution
+    float Ks = pow(max(dot(N,H), 0.0), shininess);
+    vec4 specular = Ks * specularProduct * 0.0;
+
+    if (dot(L,N) < 0.0){
+        specular = vec4(0.0, 0.0, 0.0, 1.0);
+    }
+    /////////////////////////////////////////////
+
+
+    ///////////////purely specular light/////////////////////////
+    vec3 pos2 = -(MVCMT*vPosition).xyz;
+    vec3 L2 = normalize(light2-pos2);
+
+    vec3 E2 = normalize(-pos2);
+    vec3 H2 = normalize(L2+E2);   //Blinn
+
+    //normal to final position
+    vec3 N2 = normalize((MVCMT*vNormal).xyz);
+
+    //ambient contribution
+    vec4 ambient2 = 0.0 * ambientProduct2; //no ambient contribution
+
+    //diffuse contribution
+    float Kd2 = max(dot(L2,N2), 0.0);
+    vec4 diffuse2 = 0.0 * Kd2*diffuseProduct2; //no diffuse contribution
+
+    //specular contribution
+    float Ks2 = pow(max(dot(N2,H2), 0.0), shininess);
+    vec4 specular2 = Ks2 * specularProduct2;
+
+    if (dot(L2,N2) < 0.0){
+        specular2 = vec4(0.0, 0.0, 0.0, 1.0);
+    }
+    ///////////////////////////////////////////
+
+
+    //adds lights to fColor
+    //adds the ambient and diffuse off the first light but only the specular from the second light
+    fColor = ambient + diffuse + specular2;
+    fColor.a = 1.0;
+
+    //applies transformation to the object
+    gl_Position =
+                    projectionMatrix*
+                    MVCMT*
+                    vPosition;
+
+    fTexCoord = vTexCoord;
+    }
+</script>
+
+
+
+HTML StartUp:  fragment shader <br>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+// FRAGMENT SHADER
+// This is applied to every vertex
+
+// set floating point precision to be "medium"
+precision mediump float;
+
+uniform sampler2D texMap;
+
+// varying fColor (passed from vertex shader) is
+// assigned to gl_FragColor.
+varying vec4 fColor;
+varying vec2 fTexCoord;
+
+void
+main()
+{
+    //gl_FragColor = fColor;
+    gl_FragColor = fColor*texture2D(texMap, fTexCoord);
+}
+</script>
+
+HTML StartUp:  load java script <br>
+
+<script type="text/javascript" src="webgl-utils.js"></script>
+<script type="text/javascript" src="initShaders.js"></script>
+<script type="text/javascript" src="MV.js"></script>
+<script type="text/javascript" src="texturePractice.js"></script>
+
+HTML StartUp:  check for html5 <br>
+<br>
+<br>
+
+
+<! --
+create a html5 canvas, associated with "gl-canvas" with
+width and height 512 pixels
+-->
+<canvas id="gl-canvas" width="512" height="512">
+    Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+</body>
+
+</html>
