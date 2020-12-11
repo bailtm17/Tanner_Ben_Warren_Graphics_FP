@@ -1,99 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
 
-Tanner Bailey, Warren Jernigan, and Ben Sauberman<br>
-!!! Let's Play Mario !!! <br>
-Computer Science 363 - Computer Graphics <br>
-Final Project - Due December 11th @5PM <br>
+
+
+Ben Tanner Warren<br>
+CSC363 <br>
+Final Project <br>
+<br>
 <br>
 <br>
 
-<script id = "vertex-shader" type = "x-shader/x-vertex">
-    attribute vec4 vertexPosition;
-    attribute vec4 vertexColor;
-    attribute vec4 vertexNormal;
+HTML StartUp:  vertex shader <br>
+
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+    // VERTEX SHADER
+    // This is called and applied to every vertex. The vertex
+    // in this shader has two "attributes", a position (vPosition),
+    // a color (vColor),
+    attribute vec4 vPosition;
+    attribute vec4 vColor;
+
+    attribute vec4 vNormal;
+    attribute float vType;
+
+    bool shouldRotate = true;
 
     uniform float runRate;
     uniform float jumpRate;
-    uniform mat4 modelViewMat;
-    uniform mat4 projectionMat;
 
-    uniform vec4 ambientProduct, diffuseProduct, specularProduct;
-    uniform vec4 lightPosition;
-    uniform float shininess;
+    uniform mat4 modelViewMatrix;
+    uniform mat4 projectionMatrix;
+
+    uniform float shininess2;
 
     varying vec4 fColor;
+
     void
-    main(){
-        mat4 runMat    = mat4(1.0, 0.0, 0.0, 0.0,
-                              0.0, 1.0, 0.0, 0.0,
-                              0.0, 0.0, 1.0, 0.0,
-                              runRate, 0.0, 0.0, 1.0);
-        mat4 jumpMat   = mat4(1.0, 0.0, 0.0, 0.0,
-                              0.0, 1.0, 0.0, 0.0,
-                              0.0, 0.0, 1.0, 0.0,
-                              0.0, jumpRate, 0.0, 1.0);
-       gl_Position     = projectionMat * modelViewMat * runMat *
-                          mat4(1.0                    , 0.0            , 0.0                , 0.0,
-                               0.0                    , 1.0            , 0.0                , 0.0,
-                               0.0                    , 0.0            , 1.0                , 0.0,
-                               3.0                    , 0.0            , 0.0                , 1.0) *
-                          jumpMat * vertexPosition;
-       vec4 position   = -(modelViewMat * runMat *
-                          mat4(1.0                    , 0.0            , 0.0                , 0.0,
-                               0.0                    , 1.0            , 0.0                , 0.0,
-                               0.0                    , 0.0            , 1.0                , 0.0,
-                               3.0                    , 0.0            , 0.0                , 1.0) *
-                          jumpMat * vertexPosition);
+    main()
+    {
+    //set up light model
+    float shininess = 200.0;
+    vec3 light = vec3(0.75, 1.3, 2.8);
+    vec4 ambientProduct = vec4(0.6, 0.6, 0.75, 1.0);
+    vec4 diffuseProduct = vec4(0.0, 0.3, 0.1, 1.0);
+    vec4 specularProduct = vec4(0.9, 0.0, 0.3, 1.0);
 
-        vec4 light    = lightPosition;
-        vec4 L        = normalize(light - position);
-        vec4 E        = normalize(-position);
-        vec4 H        = normalize(L + E);
-        vec4 N        = -(modelViewMat * runMat *
-                          mat4(1.0                    , 0.0            , 0.0                , 0.0,
-                               0.0                    , 1.0            , 0.0                , 0.0,
-                               0.0                    , 0.0            , 1.0                , 0.0,
-                               3.0                    , 0.0            , 0.0                , 1.0) *
-                               jumpMat * vertexNormal);
-        N            = normalize(N);
+    vec3 light2 = vec3(0.5, -2.5, 0.5);
+    vec4 ambientProduct2 = vec4(0.0, 0.0, 0.0, 0.0);
+    vec4 diffuseProduct2 = vec4(0.0, 0.0, 0.0, 0.0);
+    vec4 specularProduct2 = vec4(0.1, 0.2, 0.7, 0.8);
 
-        vec4  ambient   = ambientProduct;
-        float kDiffuse  = max(dot(L, N), 0.0);
-        vec4  diffuse   = kDiffuse * diffuseProduct;
-        float kSpecular = pow(max(dot(N, H), 0.0), shininess);
-        vec4  specular  = kSpecular * specularProduct;
-        if(dot(L, N) < 0.0){
-            specular = vec4(0.0, 0.0, 0.0, 1.0);
-        }
+    //current Matrix Transform
+    // creates rotation of the object about the origin
+    mat4 CMT = mat4(1.0, 0.0, 0.0, 0.0,
+                  0.0, 1.0, 0.0, 0.0,
+                  0.0, 0.0, 1.0, 0.0,
+                  runRate, 0.0, 0.0, 1.0) *
+                  mat4(0.5                    , 0.0            , 0.0                , 0.0,
+                   0.0                    , 0.5            , 0.0                , 0.0,
+                   0.0                    , 0.0            , -0.5                , 0.0,
+                   0.0                    , 0.0            , 0.0                , 1.0) *  mat4(1.0, 0.0, 0.0, 0.0,
+                  0.0, 1.0, 0.0, 0.0,
+                  0.0, 0.0, 1.0, 0.0,
+                  0.0, jumpRate, 0.0, 1.0);
 
-        fColor = specular + ambient + diffuse;
-        fColor.a = 1.0;
+
+    mat4 MVCMT = modelViewMatrix * CMT;
+
+    //Apply BLINN-PHONG
+
+    //determine vector from vPosition in modelView back to light
+    vec3 pos = -(MVCMT*vPosition).xyz;
+
+    vec3 L = normalize(light-pos);
+    vec3 L2 = normalize(light2-pos);
+
+
+    vec3 E = normalize(-pos);
+
+    vec3 H = normalize(L+E);
+    vec3 H2 = normalize(L2+E);
+
+    //normalize to final position
+    vec3 N = normalize((MVCMT*vNormal).xyz);
+
+    vec4 ambient = ambientProduct;
+    vec4 ambient2 = ambientProduct2;
+
+    float Kd = max(dot(L,N), 0.0);
+    float Kd2 = max(dot(L2,N), 0.0);
+
+    vec4 diffuse = Kd*diffuseProduct;
+    vec4 diffuse2 = Kd2*diffuseProduct2;
+
+    float Ks = pow(max(dot(N,H), 0.0), shininess);
+    float Ks2 = pow(max(dot(N,H2), 0.0), shininess2);
+
+    vec4 specular = Ks * specularProduct;
+    vec4 specular2 = Ks2 * specularProduct2;
+
+    if (dot(L,N) < 0.0) {
+        specular = vec4(0.0, 0.0, 0.0, 1.0);
     }
+    if (dot(L2,N) < 0.0) {
+        specular2 = vec4(0.0, 0.0, 0.0, 1.0);
+    }
+    specular = specular + specular2;
+    fColor = vColor + specular;
+    fColor.a = 1.0;
+
+    gl_Position = projectionMatrix * MVCMT * vPosition;
+
+  }
 </script>
 
-<script id = "fragment-shader" type = "x-shader/x-vertex">
-precision mediump float;
-varying vec4 fColor;
 
+
+HTML StartUp:  fragment shader <br>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+// FRAGMENT SHADER
+// This is applied to every vertex
+
+// set floating point precision to be "medium"
+precision mediump float;
+
+// varying fColor (passed from vertex shader) is
+// assigned to gl_FragColor.
+varying vec4 fColor;
 void
-main(){
+main()
+{
     gl_FragColor = fColor;
 }
-
 </script>
 
-<script type="text/javascript" src="../Tanner_Ben_Warren_Graphics_FP/webgl-utils.js"></script>
-<script type="text/javascript" src="../Tanner_Ben_Warren_Graphics_FP/initShaders.js"></script>
-<script type="text/javascript" src="../Tanner_Ben_Warren_Graphics_FP/MV.js"></script>
+HTML StartUp:  load java script <br>
+
+<script type="text/javascript" src="webgl-utils.js"></script>
+<script type="text/javascript" src="initShaders.js"></script>
+<script type="text/javascript" src="MV.js"></script>
 <script type="text/javascript" src="Driver.js"></script>
 
-<canvas id="gl-canvas" width="512" height="512">
+HTML StartUp:  check for html5 <br>
+<br>
+<br>
+
+
+<! --
+create a html5 canvas, associated with "gl-canvas" with
+width and height 512 pixels
+-->
+<canvas id="gl-canvas" width="1024" height="1024">
     Oops ... your browser doesn't support the HTML5 canvas element
 </canvas>
-
+<div class="slidecontainer">
+    <input type="range" min="1" max="2000" value="50" class="slider" id="slider2">
+</div>
 <button class = "button bbutton" id = RunButton>Run/Stop</button>
 <button class = "button rbutton" id = JumpButton>Jump/Drop</button>
 <button class = "button gbutton" id = SaveButton>Save The Princess!</button>
+
+
+</body>
+
 
 </html>
